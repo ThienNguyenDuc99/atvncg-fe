@@ -1,7 +1,7 @@
 <!--<template>-->
 <!--  <div class="home">-->
 <!--    <h1>Xin chào!</h1>-->
-<!--    <p>Bạn đã đăng nhập thành công 🎉</p>-->
+<!--    <p>Bạn đã đăng nhập thành công1 🎉</p>-->
 <!--  </div>-->
 <!--</template>-->
 
