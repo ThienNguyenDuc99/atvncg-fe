@@ -29,7 +29,8 @@
 
       <div class="zone-card"
            v-for="z in zones"
-           :key="z.zoneId">
+           :key="z.zoneId"
+           @click="goToZone(z.zoneId)">
         <p><strong>Zone ID:</strong> {{ z.zoneId }}</p>
         <p><strong>Tên:</strong> {{ z.name }}</p>
         <p><strong>Giá:</strong> {{ z.price.toLocaleString() }} VNĐ</p>
@@ -45,6 +46,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import api from "../api";
+import { useRouter } from "vue-router";
 
 const events = ref([]);
 const zones = ref([]);
@@ -105,6 +107,12 @@ const loadZones = async (eventId) => {
   } catch (err) {
     console.error("Load zones failed", err);
   }
+};
+
+
+const router = useRouter();
+const goToZone = (zoneId) => {
+  router.push(`/zone/${zoneId}`);
 };
 </script>
 
