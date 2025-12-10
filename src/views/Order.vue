@@ -1,56 +1,33 @@
 <template>
   <div class="order">
-    <h2>Xác nhận đặt vé</h2>
+    <h2>Thông tin đặt vé</h2>
 
-    <p><strong>Ghế đã chọn:</strong></p>
-    <ul>
-      <li v-for="s in seatList" :key="s">Ghế {{ s }}</li>
-    </ul>
+    <p><strong>Các ghế đã chọn:</strong> {{ seatList.join(", ") }}</p>
 
-    <p class="total">
-      <strong>Tổng tiền:</strong>
-      {{ totalPrice.toLocaleString() }} VNĐ
-    </p>
+    <p><strong>Giá / 1 ghế:</strong> {{ price.toLocaleString() }} VNĐ</p>
 
-    <button class="confirm-btn" @click="confirmOrder">
-      Xác nhận đặt vé
-    </button>
+    <p><strong>Số lượng ghế:</strong> {{ seatList.length }}</p>
+
+    <h3><strong>Tổng tiền:</strong> {{ totalPrice.toLocaleString() }} VNĐ</h3>
+
+    <button @click="confirmOrder">Xác nhận đặt vé</button>
   </div>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { ref } from "vue";
+import { useRoute } from "vue-router";
 
-const route = useRoute()
+const route = useRoute();
 
-// ⭐ Nhận từ query
-const seatList = JSON.parse(route.query.seats || "[]")
-const price = Number(route.query.price || 0)
+// Lấy dữ liệu từ ZoneDetail.vue
+const seatList = ref(JSON.parse(route.query.seats));
+const price = Number(route.query.price);
 
-const totalPrice = price * seatList.length
+// Tính tổng tiền
+const totalPrice = price * seatList.value.length;
 
-function confirmOrder() {
-  alert("Đặt vé thành công!")
-  // TODO: gọi API đặt vé thật
-}
+const confirmOrder = () => {
+  alert(`Đặt vé thành công! Tổng tiền: ${totalPrice.toLocaleString()} VNĐ`);
+};
 </script>
-
-<style scoped>
-.order {
-  max-width: 600px;
-  margin: 20px auto;
-}
-
-.total {
-  margin: 20px 0;
-  font-size: 20px;
-}
-
-.confirm-btn {
-  padding: 12px 20px;
-  background: green;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-}
-</style>

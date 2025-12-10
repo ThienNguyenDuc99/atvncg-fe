@@ -30,7 +30,7 @@
       <div class="zone-card"
            v-for="z in zones"
            :key="z.zoneId"
-           @click="goToZone(z.zoneId)">
+           @click="goToZone(z)">
         <p><strong>Zone ID:</strong> {{ z.zoneId }}</p>
         <p><strong>Tên:</strong> {{ z.name }}</p>
         <p><strong>Giá:</strong> {{ z.price.toLocaleString() }} VNĐ</p>
@@ -111,8 +111,17 @@ const loadZones = async (eventId) => {
 
 
 const router = useRouter();
-const goToZone = (zoneId) => {
-  router.push(`/zone/${zoneId}`);
+const goToZone = (z) => {
+  router.push({
+    name: "ZoneDetail",
+    params: {
+      id: z.zoneId
+    },
+    query: {
+      zoneName: z.name,
+      price: z.price
+    }
+  });
 };
 </script>
 

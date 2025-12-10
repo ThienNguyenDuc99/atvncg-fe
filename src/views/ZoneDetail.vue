@@ -97,9 +97,7 @@ const goToOrder = () => {
     name: "order",
     query: {
       seats: JSON.stringify(selectedSeats.value),
-      zoneId,
-      zoneName,
-      price
+      price: price
     }
   });
 };
