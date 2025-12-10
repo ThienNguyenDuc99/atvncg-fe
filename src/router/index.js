@@ -11,7 +11,7 @@ const routes = [
     { path: '/register', component: RegisterView },
     { path: '/home', component: Home },
     { path: '/zone/:id', component: ZoneDetail, name: 'ZoneDetail' },
-    { path: '/order',name: 'Order',component: Order,props: true},
+    { path: '/order',name: 'order',component: Order,props: true},
 ]
 
 const router = createRouter({

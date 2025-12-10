@@ -11,32 +11,47 @@
           :key="s.seatId"
           class="seat"
           :class="{
-          booked: s.status !== 'Available',
-          available: s.status === 'Available',
-          selected: selectedSeats.includes(s.seatId)
-        }"
+            booked: s.status !== 'Available',
+            available: s.status === 'Available',
+            selected: selectedSeats.includes(s.seatId)
+          }"
           @click="toggleSeat(s)"
       >
         {{ s.seatId }}
       </div>
     </div>
+
+    <!-- ⭐ BUTTON ĐẶT VÉ -->
+    <div class="order-box" v-if="selectedSeats.length > 0">
+      <p><strong>Đã chọn:</strong> {{ selectedSeats.length }} ghế</p>
+
+      <button class="order-btn" @click="goToOrder">
+        Tiếp tục đặt vé
+      </button>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import api from "../api";
 
 const route = useRoute();
+const router = useRouter();
+
 const zoneId = route.params.id;
+const price = Number(route.query.price);    // <-- LẤY PRICE TỪ HOME
+const zoneName = route.query.name;          // <-- LẤY NAME TỪ HOME
 
 const seats = ref([]);
 const loading = ref(true);
 const error = ref("");
 
-const selectedSeats = ref([]); // ghế người dùng chọn
+const selectedSeats = ref([]);
 
+// Load seats
 onMounted(async () => {
   try {
     const token = localStorage.getItem("token");
@@ -67,7 +82,6 @@ onMounted(async () => {
 
 // Toggle chọn ghế
 const toggleSeat = (s) => {
-  // Nếu ghế đã book → không cho chọn
   if (s.status !== "Available") return;
 
   if (selectedSeats.value.includes(s.seatId)) {
@@ -75,6 +89,19 @@ const toggleSeat = (s) => {
   } else {
     selectedSeats.value.push(s.seatId);
   }
+};
+
+// ⭐ Redirect sang Order.vue
+const goToOrder = () => {
+  router.push({
+    name: "order",
+    query: {
+      seats: JSON.stringify(selectedSeats.value),
+      zoneId,
+      zoneName,
+      price
+    }
+  });
 };
 </script>
 
@@ -114,5 +141,29 @@ const toggleSeat = (s) => {
 
 .selected {
   border: 3px solid yellow;
+}
+
+/* --- BOX ĐẶT VÉ --- */
+.order-box {
+  margin-top: 25px;
+  padding: 15px;
+  background: #f4f4f4;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.order-btn {
+  margin-top: 10px;
+  padding: 10px 18px;
+  font-size: 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.order-btn:hover {
+  background: #0d47a1;
 }
 </style>
