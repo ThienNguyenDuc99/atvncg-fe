@@ -25,8 +25,8 @@
     <div class="order-box" v-if="selectedSeats.length > 0">
       <p><strong>Đã chọn:</strong> {{ selectedSeats.length }} ghế</p>
 
-      <button class="order-btn" @click="goToOrder">
-        Tiếp tục đặt vé
+      <button class="order-btn" @click="handleBooking" :disabled="bookingLoading">
+        {{ bookingLoading ? "Đang giữ chỗ..." : "Tiếp tục đặt vé" }}
       </button>
     </div>
 
@@ -50,6 +50,9 @@ const loading = ref(true);
 const error = ref("");
 
 const selectedSeats = ref([]);
+
+const bookingLoading = ref(false);
+
 
 // Load seats
 onMounted(async () => {
@@ -92,15 +95,44 @@ const toggleSeat = (s) => {
 };
 
 // ⭐ Redirect sang Order.vue
-const goToOrder = () => {
-  router.push({
-    name: "order",
-    query: {
-      seats: JSON.stringify(selectedSeats.value),
-      price: price
+const handleBooking = async () => {
+  bookingLoading.value = true;
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await api.post(
+        "/business/booking",
+        {
+          userId: 1,                  // TODO: sau lấy từ token
+          seatIds: selectedSeats.value
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+    );
+
+    // ✅ CHỈ KHI BOOKING SUCCESS MỚI CHO ĐI TIẾP
+    if (res.data.status === "SUCCESS") {
+      router.push({
+        name: "order",
+        query: {
+          seats: JSON.stringify(selectedSeats.value),
+          price: price
+        }
+      });
+    } else {
+      alert("❌ Giữ chỗ thất bại, vui lòng thử lại!");
     }
-  });
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Có lỗi xảy ra khi giữ chỗ!");
+  }
+
+  bookingLoading.value = false;
 };
+
 </script>
 
 <style scoped>
