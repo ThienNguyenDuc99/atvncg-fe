@@ -15,12 +15,14 @@
       {{ loading ? "Đang xử lý..." : "Xác nhận đặt vé" }}
     </button>
 
-    <!-- ⭐ BUTTON THANH TOÁN (hiện khi order thành công) -->
+    <!-- KẾT QUẢ ĐẶT VÉ + BUTTON THANH TOÁN -->
     <div v-if="orderSuccess" class="payment-box">
-      <p style="color: green;"><strong>Đặt vé thành công! Mã đơn:</strong> {{ orderId }}</p>
+      <p style="color: green;">
+        <strong>Đặt vé thành công! Mã đơn:</strong> {{ orderId }}
+      </p>
 
-      <button @click="confirmPayment">
-        Xác nhận thanh toán
+      <button @click="confirmPayment" :disabled="paymentLoading">
+        {{ paymentLoading ? "Đang thanh toán..." : "Xác nhận thanh toán" }}
       </button>
     </div>
   </div>
@@ -31,11 +33,10 @@ import { ref } from "vue";
 import { useRoute } from "vue-router";
 import api from "../api";
 
+// ======================
+// LẤY DATA TỪ router
+// ======================
 const route = useRoute();
-
-// ======================
-// DỮ LIỆU TỪ ZoneDetail
-// ======================
 const seatList = ref(JSON.parse(route.query.seats));
 const price = Number(route.query.price);
 const totalPrice = price * seatList.value.length;
@@ -46,9 +47,10 @@ const totalPrice = price * seatList.value.length;
 const orderSuccess = ref(false);
 const orderId = ref(null);
 const loading = ref(false);
+const paymentLoading = ref(false);
 
 // ======================
-// GỌI API ĐẶT VÉ
+// API: ĐẶT VÉ
 // ======================
 const confirmOrder = async () => {
   loading.value = true;
@@ -59,9 +61,9 @@ const confirmOrder = async () => {
     const res = await api.post(
         "/business/order",
         {
-          userId: 1,                  // tạm fix, sau có thể lấy từ token
-          seatIds: seatList.value,    // danh sách ghế
-          price: price                // đơn giá
+          userId: 1,                  // TODO: sau lấy từ token decode
+          seatIds: seatList.value,
+          price: price
         },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -74,19 +76,51 @@ const confirmOrder = async () => {
     } else {
       alert("Đặt vé thất bại!");
     }
+
   } catch (err) {
     console.error(err);
-    alert("Có lỗi xảy ra khi đặt vé!");
+    alert("Lỗi khi đặt vé!");
   }
 
   loading.value = false;
 };
 
 // ======================
-// SAU KHI ĐẶT VÉ THÀNH CÔNG
+// API: THANH TOÁN
 // ======================
-const confirmPayment = () => {
-  alert("Thanh toán thành công!");
+const confirmPayment = async () => {
+  paymentLoading.value = true;
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await api.post(
+        "/business/payment",
+        {
+          orderId: orderId.value,
+          status: "SUCCESS",
+          totalPrice: totalPrice,
+          seatIds: seatList.value
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+    );
+
+    if (res.data.status === "SUCCESS") {
+      alert("🎉 Thanh toán thành công!");
+    } else if (res.data.status === "ALREADY_PAID") {
+      alert("⚠️ Đơn hàng này đã được thanh toán trước đó!");
+    } else {
+      alert("❌ Thanh toán thất bại!");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Lỗi khi thanh toán!");
+  }
+
+  paymentLoading.value = false;
 };
 </script>
 
